@@ -1,0 +1,126 @@
+# Core framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Database and caching
+asyncpg==0.29.0
+redis==5.0.1
+sqlalchemy==2.0.23
+alembic==1.13.1
+
+# Machine Learning
+numpy==1.25.2
+pandas==2.1.4
+scikit-learn==1.3.2
+xgboost==2.0.2
+lightgbm==4.1.0
+joblib==1.3.2
+
+# Deep Learning (optional for advanced models)
+torch==2.1.1
+torchvision==0.16.1
+transformers==4.36.2
+
+# Data processing and analysis
+scipy==1.11.4
+matplotlib==3.8.2
+seaborn==0.13.0
+plotly==5.17.0
+
+# Financial data and APIs
+yfinance==0.2.28
+alpha-vantage==2.3.1
+quandl==3.7.0
+requests==2.31.0
+httpx==0.25.2
+
+# Real estate data
+zillow==0.1.2
+
+# Web scraping (for data collection)
+beautifulsoup4==4.12.2
+selenium==4.16.0
+
+# Time series analysis
+statsmodels==0.14.0
+prophet==1.1.5
+
+# API documentation
+fastapi-users==12.1.2
+python-multipart==0.0.6
+
+# Authentication and security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-decouple==3.8
+
+# Logging and monitoring
+loguru==0.7.2
+sentry-sdk==1.38.0
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+httpx==0.25.2
+
+# Development tools
+black==23.11.0
+isort==5.13.0
+flake8==6.1.0
+mypy==1.7.1
+
+# Environment and configuration
+python-dotenv==1.0.0
+
+# Blockchain integration
+stellar-sdk==8.7.0
+
+# Image processing (for property images)
+Pillow==10.1.0
+opencv-python==4.8.1.78
+
+# Natural language processing
+nltk==3.8.1
+spacy==3.7.2
+
+# Data validation
+cerberus==1.3.5
+
+# Async support
+aiofiles==23.2.1
+aioredis==2.0.1
+
+# Date and time utilities
+python-dateutil==2.8.2
+pytz==2023.3
+
+# Mathematical libraries
+sympy==1.12
+
+# Market data providers
+alpha-vantage==2.3.1
+polygon-api-client==1.11.0
+
+# Alternative data sources
+newsapi-python==0.2.7
+
+# Geospatial analysis (for real estate)
+geopy==2.4.1
+folium==0.15.0
+
+# Model serving and MLOps
+mlflow==2.8.1
+bentoml==1.1.10
+
+# Performance monitoring
+prometheus-client==0.19.0
+
+# Configuration management
+omegaconf==2.3.0
+
+# Advanced analytics
+networkx==3.2.1
+community==1.0.0b1 

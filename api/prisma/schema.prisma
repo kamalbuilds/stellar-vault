@@ -1,0 +1,377 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for platform users
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  password          String
+  firstName         String?
+  lastName          String?
+  role              UserRole  @default(USER)
+  isActive          Boolean   @default(true)
+  isEmailVerified   Boolean   @default(false)
+  stellarPublicKey  String?   @unique
+  stellarSecretKey  String?   // Encrypted
+  kycStatus         KycStatus @default(PENDING)
+  
+  // Timestamps
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastLoginAt       DateTime?
+  
+  // Relations
+  assets            Asset[]
+  transactions      Transaction[]
+  kycDocuments      KycDocument[]
+  portfolios        Portfolio[]
+  notifications     Notification[]
+  
+  @@map("users")
+}
+
+// Asset model for tokenized real-world assets
+model Asset {
+  id                  String              @id @default(cuid())
+  assetId             String              @unique // Blockchain asset ID
+  name                String
+  description         String?
+  assetType           AssetType
+  valuation           Decimal             @db.Decimal(18,8)
+  currency            String              @default("USD")
+  tokenizedAmount     Decimal             @db.Decimal(18,8)
+  totalSupply         Decimal             @db.Decimal(18,8)
+  availableSupply     Decimal             @db.Decimal(18,8)
+  tokenSymbol         String
+  tokenName           String
+  complianceStatus    ComplianceStatus    @default(PENDING)
+  geographicalLocation String?
+  custodian           String?
+  
+  // Blockchain data
+  contractAddress     String?
+  networkId           String              @default("testnet")
+  deploymentTxHash    String?
+  
+  // AI/ML data
+  aiValuation         Decimal?            @db.Decimal(18,8)
+  aiConfidence        Float?
+  lastValuationUpdate DateTime?
+  valuationHistory    ValuationHistory[]
+  
+  // Metadata
+  documents           Json?               // IPFS hashes and document metadata
+  images              Json?               // Asset images and media
+  metadata            Json?               // Additional asset metadata
+  
+  // Status and timestamps
+  isActive            Boolean             @default(true)
+  isListed            Boolean             @default(false)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  
+  // Relations
+  owner               User                @relation(fields: [ownerId], references: [id])
+  ownerId             String
+  transactions        Transaction[]
+  portfolioAssets     PortfolioAsset[]
+  complianceChecks    ComplianceCheck[]
+  
+  @@map("assets")
+}
+
+// Transaction model for asset trading
+model Transaction {
+  id                String            @id @default(cuid())
+  transactionId     String            @unique // Blockchain transaction ID
+  type              TransactionType
+  status            TransactionStatus @default(PENDING)
+  
+  // Asset information
+  asset             Asset             @relation(fields: [assetId], references: [id])
+  assetId           String
+  
+  // Transaction details
+  amount            Decimal           @db.Decimal(18,8)
+  price             Decimal?          @db.Decimal(18,8)
+  totalValue        Decimal?          @db.Decimal(18,8)
+  currency          String            @default("USD")
+  
+  // Parties involved
+  buyer             User?             @relation(fields: [buyerId], references: [id])
+  buyerId           String?
+  seller            User?             @relation(fields: [sellerId], references: [id], name: "SellerTransactions")
+  sellerId          String?
+  
+  // Blockchain data
+  txHash            String?
+  blockNumber       BigInt?
+  gasUsed           BigInt?
+  gasPrice          BigInt?
+  networkFee        Decimal?          @db.Decimal(18,8)
+  
+  // Compliance
+  complianceChecked Boolean           @default(false)
+  complianceResult  Json?
+  
+  // Timestamps
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  executedAt        DateTime?
+  
+  @@map("transactions")
+}
+
+// Portfolio model for user asset portfolios
+model Portfolio {
+  id                String            @id @default(cuid())
+  name              String
+  description       String?
+  isDefault         Boolean           @default(false)
+  
+  // Portfolio metrics
+  totalValue        Decimal           @default(0) @db.Decimal(18,8)
+  totalReturn       Decimal           @default(0) @db.Decimal(18,8)
+  totalReturnPct    Float             @default(0)
+  
+  // Risk metrics
+  riskScore         Float?
+  volatility        Float?
+  sharpeRatio       Float?
+  
+  // Timestamps
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  // Relations
+  owner             User              @relation(fields: [ownerId], references: [id])
+  ownerId           String
+  assets            PortfolioAsset[]
+  
+  @@map("portfolios")
+}
+
+// Junction table for portfolio assets
+model PortfolioAsset {
+  id                String    @id @default(cuid())
+  
+  portfolio         Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolioId       String
+  
+  asset             Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  assetId           String
+  
+  // Position details
+  quantity          Decimal   @db.Decimal(18,8)
+  averagePrice      Decimal   @db.Decimal(18,8)
+  currentValue      Decimal   @db.Decimal(18,8)
+  unrealizedPnL     Decimal   @default(0) @db.Decimal(18,8)
+  
+  // Timestamps
+  addedAt           DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@unique([portfolioId, assetId])
+  @@map("portfolio_assets")
+}
+
+// Valuation history for AI-powered asset valuations
+model ValuationHistory {
+  id                String    @id @default(cuid())
+  
+  asset             Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  assetId           String
+  
+  valuation         Decimal   @db.Decimal(18,8)
+  confidence        Float
+  methodology       String    // AI model used
+  factors           Json?     // Valuation factors considered
+  
+  createdAt         DateTime  @default(now())
+  
+  @@map("valuation_history")
+}
+
+// KYC document model
+model KycDocument {
+  id                String        @id @default(cuid())
+  type              DocumentType
+  status            DocumentStatus @default(PENDING)
+  fileName          String
+  fileUrl           String
+  fileHash          String?       // For integrity verification
+  
+  // Verification data
+  verifiedAt        DateTime?
+  verifiedBy        String?
+  rejectedReason    String?
+  
+  // Timestamps
+  uploadedAt        DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  // Relations
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  
+  @@map("kyc_documents")
+}
+
+// Compliance check model
+model ComplianceCheck {
+  id                String            @id @default(cuid())
+  type              ComplianceType
+  status            ComplianceStatus
+  result            Json?             // Detailed compliance check results
+  score             Float?            // Compliance score (0-1)
+  
+  // Check details
+  checkedAt         DateTime          @default(now())
+  validUntil        DateTime?
+  
+  // Relations
+  asset             Asset?            @relation(fields: [assetId], references: [id])
+  assetId           String?
+  
+  @@map("compliance_checks")
+}
+
+// Notification model
+model Notification {
+  id                String            @id @default(cuid())
+  title             String
+  message           String
+  type              NotificationType
+  isRead            Boolean           @default(false)
+  
+  // Additional data
+  data              Json?
+  actionUrl         String?
+  
+  // Timestamps
+  createdAt         DateTime          @default(now())
+  readAt            DateTime?
+  
+  // Relations
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  
+  @@map("notifications")
+}
+
+// System configuration model
+model SystemConfig {
+  id                String    @id @default(cuid())
+  key               String    @unique
+  value             String
+  description       String?
+  isActive          Boolean   @default(true)
+  
+  updatedAt         DateTime  @updatedAt
+  
+  @@map("system_config")
+}
+
+// Enums
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+  COMPLIANCE_OFFICER
+  ASSET_MANAGER
+}
+
+enum KycStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum AssetType {
+  REAL_ESTATE
+  COMMODITIES
+  ART_COLLECTIBLES
+  BONDS
+  PRIVATE_EQUITY
+  INFRASTRUCTURE
+  PRECIOUS_METALS
+  INTELLECTUAL_PROPERTY
+}
+
+enum ComplianceStatus {
+  PENDING
+  IN_REVIEW
+  VERIFIED
+  REJECTED
+  EXPIRED
+  SUSPENDED
+}
+
+enum TransactionType {
+  BUY
+  SELL
+  TRANSFER
+  MINT
+  BURN
+  TOKENIZATION
+  REDEMPTION
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum DocumentType {
+  IDENTITY
+  PROOF_OF_ADDRESS
+  INCOME_VERIFICATION
+  ASSET_OWNERSHIP
+  LEGAL_AGREEMENT
+  APPRAISAL_REPORT
+  INSURANCE_DOCUMENT
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum ComplianceType {
+  KYC
+  AML
+  SANCTIONS_CHECK
+  PEP_CHECK
+  ASSET_VERIFICATION
+  LEGAL_COMPLIANCE
+  TAX_COMPLIANCE
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+  TRANSACTION_UPDATE
+  COMPLIANCE_UPDATE
+  VALUATION_UPDATE
+  SYSTEM_ALERT
+} 

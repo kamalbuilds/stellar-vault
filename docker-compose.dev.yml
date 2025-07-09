@@ -1,0 +1,167 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: stellar-vault-postgres
+    environment:
+      POSTGRES_DB: stellarvault
+      POSTGRES_USER: stellarvault
+      POSTGRES_PASSWORD: stellarvault_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - stellar-vault-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stellarvault"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: stellar-vault-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - stellar-vault-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Backend API
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    container_name: stellar-vault-api
+    ports:
+      - "8000:8000"
+    environment:
+      NODE_ENV: development
+      PORT: 8000
+      DATABASE_URL: postgresql://stellarvault:stellarvault_dev_password@postgres:5432/stellarvault
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev_jwt_secret_change_in_production
+      STELLAR_NETWORK: testnet
+      STELLAR_HORIZON_URL: https://horizon-testnet.stellar.org
+      STELLAR_PASSPHRASE: "Test SDF Network ; September 2015"
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - stellar-vault-network
+    restart: unless-stopped
+
+  # AI Engine
+  ai-engine:
+    build:
+      context: ./ai-engine
+      dockerfile: Dockerfile.dev
+    container_name: stellar-vault-ai
+    ports:
+      - "8001:8001"
+    environment:
+      PYTHONPATH: /app
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://stellarvault:stellarvault_dev_password@postgres:5432/stellarvault
+      REDIS_URL: redis://redis:6379
+      ML_MODEL_VERSION: v1.0.0
+    volumes:
+      - ./ai-engine:/app
+      - ai_models:/app/models
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - stellar-vault-network
+    restart: unless-stopped
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: stellar-vault-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_AI_ENGINE_URL: http://localhost:8001
+      NEXT_PUBLIC_STELLAR_NETWORK: testnet
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - api
+      - ai-engine
+    networks:
+      - stellar-vault-network
+    restart: unless-stopped
+
+  # Prometheus (Monitoring)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: stellar-vault-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - stellar-vault-network
+    restart: unless-stopped
+
+  # Grafana (Monitoring Dashboard)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: stellar-vault-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/docker/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./infrastructure/docker/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - stellar-vault-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  ai_models:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  stellar-vault-network:
+    driver: bridge 

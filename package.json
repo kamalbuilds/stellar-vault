@@ -1,0 +1,84 @@
+{
+  "name": "stellar-vault",
+  "version": "1.0.0",
+  "description": "AI-Powered Real-World Asset Tokenization Platform on Stellar",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:frontend\" \"npm run dev:ai\"",
+    "dev:api": "cd api && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:ai": "cd ai-engine && python main.py",
+    "build": "npm run build:contracts && npm run build:frontend && npm run build:api",
+    "build:contracts": "cd contracts && stellar contract build",
+    "build:frontend": "cd frontend && npm run build",
+    "build:api": "cd api && npm run build",
+    "test": "npm run test:contracts && npm run test:frontend && npm run test:api && npm run test:ai",
+    "test:contracts": "cd contracts && cargo test",
+    "test:frontend": "cd frontend && npm test",
+    "test:api": "cd api && npm test",
+    "test:ai": "cd ai-engine && python -m pytest",
+    "deploy": "npm run deploy:contracts && npm run deploy:api && npm run deploy:frontend",
+    "deploy:contracts": "cd contracts && stellar contract deploy --network testnet",
+    "deploy:api": "docker-compose up --build api",
+    "deploy:frontend": "cd frontend && npm run build && npm run export",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
+    "docker:prod": "docker-compose -f docker-compose.prod.yml up --build",
+    "setup": "npm run setup:api && npm run setup:frontend && npm run setup:ai",
+    "setup:api": "cd api && npm install",
+    "setup:frontend": "cd frontend && npm install",
+    "setup:ai": "cd ai-engine && pip install -r requirements.txt",
+    "lint": "npm run lint:frontend && npm run lint:api",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:api": "cd api && npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kamalbuilds/stellar-vault.git"
+  },
+  "keywords": [
+    "stellar",
+    "blockchain",
+    "tokenization",
+    "rwa",
+    "real-world-assets",
+    "ai",
+    "machine-learning",
+    "defi",
+    "soroban",
+    "smart-contracts"
+  ],
+  "author": "Kamal Singh <kamal@stellarvault.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kamalbuilds/stellar-vault/issues"
+  },
+  "homepage": "https://github.com/kamalbuilds/stellar-vault#readme",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0"
+  },
+  "workspaces": [
+    "api",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm test"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
+} 
