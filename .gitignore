@@ -8,3 +8,6 @@ node_modules
 
 frontend/.next
 contracts/target
+
+ai-engine/venv
+ai-engine/venv/*
