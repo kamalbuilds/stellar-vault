@@ -23,16 +23,16 @@ StellarVault is an AI-powered platform for tokenizing Real-World Assets (RWAs) o
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        StellarVault Platform                    │
-├─────────────────┬─────────────────┬─────────────────┬──────────┤
-│   Frontend      │   Backend API   │   AI Engine     │ Contracts│
-│   (Next.js)     │   (Node.js)     │   (Python)      │ (Soroban)│
-│                 │                 │                 │          │
-│ • Dashboard     │ • Asset APIs    │ • Valuation     │ • Asset  │
-│ • Trading UI    │ • Auth/KYC      │ • Risk Models   │ • Compliance│
-│ • Analytics     │ • Compliance    │ • ML Training   │ • Portfolio│
-│ • KYC Portal    │ • WebSocket     │ • Real-time     │ • Settlement│
-│                 │                 │   Analysis      │          │
-└─────────────────┴─────────────────┴─────────────────┴──────────┘
+├─────────────────┬─────────────────┬─────────────────┬──────────-┤
+│   Frontend      │   Backend API   │   AI Engine     │ Contracts │
+│   (Next.js)     │   (Node.js)     │   (Python)      │ (Soroban) │
+│                 │                 │                 │           │
+│ • Dashboard     │ • Asset APIs    │ • Valuation     │ • Asset   │
+│ • Trading UI    │ • Auth/KYC      │ • Risk Models   │•Compliance│
+│ • Analytics     │ • Compliance    │ • ML Training   │•Portfolio │
+│ • KYC Portal    │ • WebSocket     │ • Real-time     │•Settlement│
+│                 │                 │   Analysis      │           │
+└─────────────────┴─────────────────┴─────────────────┴──────────-┘
           │                │                │              │
           └────────────────┼────────────────┼──────────────┘
                            │                │
