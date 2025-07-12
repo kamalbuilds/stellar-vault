@@ -177,18 +177,7 @@ export function Navigation() {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Link
-                  href="/login"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Sign in
-                </Link>
-                <Link
-                  href="/register"
-                  className="bg-stellar-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-stellar-700 transition-colors"
-                >
-                  Get Started
-                </Link>
+               
               </div>
             )}
 
