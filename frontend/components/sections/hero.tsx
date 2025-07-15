@@ -49,7 +49,7 @@ export function Hero() {
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
             <Link
-              href="/register"
+              href="/dashboard"
               className="group inline-flex items-center px-8 py-4 bg-stellar-600 text-white font-semibold rounded-lg hover:bg-stellar-700 transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               Start Tokenizing

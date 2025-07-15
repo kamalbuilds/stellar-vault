@@ -5,7 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import './globals.css';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { AuthProvider } from '@/components/providers/auth-provider';
-import { StellarProvider } from '@/components/providers/stellar-provider';
+import { WalletProvider } from '@/contexts/WalletContext';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { Navigation } from '@/components/layout/navigation';
 import { Footer } from '@/components/layout/footer';
@@ -118,7 +118,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         >
           <QueryProvider>
             <AuthProvider>
-              <StellarProvider>
+              <WalletProvider>
                 <div className="relative flex min-h-screen flex-col">
                   <Navigation />
                   <main className="flex-1">
@@ -149,7 +149,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
                     },
                   }}
                 />
-              </StellarProvider>
+              </WalletProvider>
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>

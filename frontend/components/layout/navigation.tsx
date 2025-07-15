@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/providers/auth-provider';
-import { useStellar } from '@/components/providers/stellar-provider';
+import { useWallet, WalletStatus } from '@/contexts/WalletContext';
 import { useTheme } from 'next-themes';
 import { 
   Menu, 
@@ -27,7 +27,15 @@ export function Navigation() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
-  const { walletAddress, isConnected, connectWallet, disconnectWallet } = useStellar();
+  const { 
+    account, 
+    status, 
+    connect, 
+    disconnect
+  } = useWallet();
+  
+  const walletAddress = account?.publicKey;
+  const isConnected = status === WalletStatus.CONNECTED;
 
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: TrendingUp },
@@ -37,11 +45,13 @@ export function Navigation() {
   ];
 
   const handleWalletAction = async () => {
+    console.log('Wallet button clicked! Status:', status, 'IsConnected:', isConnected);
+    
     if (isConnected) {
-      disconnectWallet();
+      disconnect();
     } else {
       try {
-        await connectWallet();
+        await connect();
       } catch (error) {
         console.error('Failed to connect wallet:', error);
       }
@@ -102,19 +112,25 @@ export function Navigation() {
             </button>
 
             {/* Wallet connection */}
-            <button
-              onClick={handleWalletAction}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                isConnected
-                  ? 'bg-success-100 text-success-800 hover:bg-success-200 dark:bg-success-900/20 dark:text-success-300'
-                  : 'bg-stellar-600 text-white hover:bg-stellar-700'
-              }`}
-            >
-              <Wallet className="w-4 h-4" />
-              <span className="hidden sm:inline">
-                <WalletConnect />
-              </span>
-            </button>
+            {isConnected ? (
+              <button
+                onClick={handleWalletAction}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors bg-success-100 text-success-800 hover:bg-success-200 dark:bg-success-900/20 dark:text-success-300"
+              >
+                <Wallet className="w-4 h-4" />
+                <span className="hidden sm:inline">
+                  {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connected'}
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={handleWalletAction}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors bg-stellar-600 text-white hover:bg-stellar-700"
+              >
+                <Wallet className="w-4 h-4" />
+                <span className="hidden sm:inline">Connect Wallet</span>
+              </button>
+            )}
 
             {/* User menu */}
             {isAuthenticated ? (

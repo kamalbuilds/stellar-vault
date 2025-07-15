@@ -20,6 +20,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@creit.tech/stellar-wallets-kit": "^1.7.6",
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
     "@next/bundle-analyzer": "^14.0.4",

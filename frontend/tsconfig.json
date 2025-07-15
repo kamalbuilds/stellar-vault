@@ -31,7 +31,8 @@
       "@/utils/*": ["./utils/*"],
       "@/lib/*": ["./lib/*"],
       "@/types/*": ["./types/*"],
-      "@/stores/*": ["./stores/*"]
+      "@/stores/*": ["./stores/*"],
+      "@/contexts/*": ["./contexts/*"]
     }
   },
   "include": [
