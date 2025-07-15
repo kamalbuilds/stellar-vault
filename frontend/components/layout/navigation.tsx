@@ -19,6 +19,7 @@ import {
   Shield,
   TrendingUp
 } from 'lucide-react';
+import WalletConnect from '../WalletConnect';
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -111,10 +112,7 @@ export function Navigation() {
             >
               <Wallet className="w-4 h-4" />
               <span className="hidden sm:inline">
-                {isConnected && walletAddress 
-                  ? formatAddress(walletAddress)
-                  : 'Connect Wallet'
-                }
+                <WalletConnect />
               </span>
             </button>
 
