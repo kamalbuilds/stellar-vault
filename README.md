@@ -10,7 +10,7 @@
 
 ## 🎯 Project Overview
 
-StellarVault is an AI-powered platform for tokenizing Real-World Assets (RWAs) on the Stellar blockchain, developed as part of the **DraperU x Stellar 3-Month Accelerator Program**. The platform combines cutting-edge AI technology with Stellar's efficient blockchain infrastructure to create a seamless, compliant, and intelligent asset tokenization ecosystem.
+StellarVault is an AI-powered platform for tokenizing Real-World Assets (RWAs) on the Stellar blockchain. The platform combines cutting-edge AI technology with Stellar's efficient blockchain infrastructure to create a seamless, compliant, and intelligent asset tokenization ecosystem.
 
 ### 🏆 Key Achievements
 - **Target Market**: $16T RWA tokenization opportunity by 2030
